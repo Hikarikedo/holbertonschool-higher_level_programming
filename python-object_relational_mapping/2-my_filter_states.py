@@ -1,33 +1,25 @@
 #!/usr/bin/python3
-'''
-This module takes in an argument
-and displays all values in the states table of hbtn_0e_0_usa
-where name matches the argument.
-'''
+"""
+Return matching states
+parameters given to script: username, password, database, state to match
+"""
+
+from sys import argv
 import MySQLdb
-import sys
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
-    if len(sys.argv) != 5:
-        exit(1)
+    conn = MySQLdb.connect(
+        host="localhost", port=3306, user=argv[1], passwd=argv[2], db=argv[3])
 
-    username = sys.argv[1]
-    password = sys.argv[2]
-    db_name = sys.argv[3]
-    state_name = sys.argv[4]
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM states WHERE name LIKE BINARY\
+        '{}' ORDER BY states.id".format(argv[4]))
 
-    db = MySQLdb.connect(host="localhost", port=3306,
-                         user=username, passwd=password, db=db_name)
-    cursor = db.cursor()
-    cursor.execute("SELECT * FROM states "
-                   "WHERE name = '{}' "
-                   "ORDER BY id ASC".format(state_name))
-    states = cursor.fetchall()
+    rows = cur.fetchall()
+    for row in rows:
+        print(row)
 
-    for state in states:
-        print(state)
-
-    cursor.close()
-    db.close()
+    cur.close()
+    conn.close()
